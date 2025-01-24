@@ -22,17 +22,49 @@ const Auth = () => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      if (error) throw error;
-      navigate("/dashboard");
-    } catch (error: any) {
+
+    // Basic validation
+    if (!email || !password) {
       toast({
         title: "Error",
-        description: error.message,
+        description: "Please enter both email and password",
+        variant: "destructive",
+      });
+      setLoading(false);
+      return;
+    }
+
+    try {
+      console.log("Attempting login with email:", email);
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password: password.trim(),
+      });
+
+      if (error) {
+        console.error("Login error:", error);
+        let errorMessage = "Invalid login credentials";
+        
+        // More specific error messages based on the error type
+        if (error.message.includes("Invalid login")) {
+          errorMessage = "Invalid email or password. Please try again.";
+        }
+
+        toast({
+          title: "Login Failed",
+          description: errorMessage,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      console.log("Login successful:", data);
+      navigate("/dashboard");
+    } catch (error: any) {
+      console.error("Unexpected error during login:", error);
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -47,25 +79,38 @@ const Auth = () => {
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
             Sign in to QuickMeds
           </h2>
+          <p className="mt-2 text-center text-sm text-gray-600">
+            Enter your credentials to access your account
+          </p>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleLogin}>
           <div className="rounded-md shadow-sm space-y-4">
             <div>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                Email address
+              </label>
               <Input
+                id="email"
                 type="email"
                 required
-                placeholder="Email address"
+                placeholder="Enter your email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
               />
             </div>
             <div>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+                Password
+              </label>
               <Input
+                id="password"
                 type="password"
                 required
-                placeholder="Password"
+                placeholder="Enter your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
               />
             </div>
           </div>
@@ -73,11 +118,21 @@ const Auth = () => {
           <div>
             <Button
               type="submit"
-              className="w-full"
+              className="w-full flex justify-center py-2 px-4"
               disabled={loading}
             >
               {loading ? "Signing in..." : "Sign in"}
             </Button>
+          </div>
+
+          <div className="text-sm text-center text-gray-600">
+            Test credentials available:
+            <br />
+            superadmin@quickmeds.com / superadmin123
+            <br />
+            admin@quickmeds.com / admin123
+            <br />
+            employee@quickmeds.com / employee123
           </div>
         </form>
       </div>
