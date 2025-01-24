@@ -1,6 +1,4 @@
-import { useEffect } from "react";
-import { Routes, Route, useNavigate } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
+import { Routes, Route } from "react-router-dom";
 import DashboardLayout from "@/components/DashboardLayout";
 import InventoryManagement from "@/components/InventoryManagement";
 import OrderManagement from "@/components/OrderManagement";
@@ -8,23 +6,7 @@ import UserManagement from "@/components/UserManagement";
 import Overview from "@/components/Overview";
 
 const Dashboard = () => {
-  const { session, loading } = useAuth();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (!loading && !session) {
-      navigate("/auth");
-    }
-  }, [session, loading, navigate]);
-
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
-  if (!session) {
-    return null;
-  }
-
+  // Temporarily bypass authentication checks
   return (
     <DashboardLayout>
       <Routes>

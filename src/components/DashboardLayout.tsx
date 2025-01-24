@@ -1,7 +1,6 @@
 import { useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/contexts/AuthContext";
 import {
   LayoutDashboard,
   Package,
@@ -11,14 +10,13 @@ import {
 } from "lucide-react";
 
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
-  const { profile, signOut } = useAuth();
   const location = useLocation();
-  const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const handleSignOut = async () => {
-    await signOut();
-    navigate("/auth");
+  // Temporary mock profile for development
+  const mockProfile = {
+    full_name: "Development User",
+    role: "superadmin",
   };
 
   const menuItems = [
@@ -34,7 +32,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   ];
 
   const filteredMenuItems = menuItems.filter(
-    (item) => !item.roles || (profile?.role && item.roles.includes(profile.role))
+    (item) => !item.roles || (mockProfile?.role && item.roles.includes(mockProfile.role))
   );
 
   return (
@@ -67,13 +65,13 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
           <div className="p-4 border-t">
             <div className="mb-4">
               <p className="text-sm text-gray-600">Signed in as:</p>
-              <p className="font-medium">{profile?.full_name}</p>
-              <p className="text-sm text-gray-600 capitalize">{profile?.role}</p>
+              <p className="font-medium">{mockProfile?.full_name}</p>
+              <p className="text-sm text-gray-600 capitalize">{mockProfile?.role}</p>
             </div>
             <Button
               variant="outline"
               className="w-full"
-              onClick={handleSignOut}
+              onClick={() => {}}
             >
               <LogOut className="w-4 h-4 mr-2" />
               Sign Out
@@ -140,15 +138,15 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
               <div className="mt-4 pt-4 border-t">
                 <div className="mb-4">
                   <p className="text-sm text-gray-600">Signed in as:</p>
-                  <p className="font-medium">{profile?.full_name}</p>
+                  <p className="font-medium">{mockProfile?.full_name}</p>
                   <p className="text-sm text-gray-600 capitalize">
-                    {profile?.role}
+                    {mockProfile?.role}
                   </p>
                 </div>
                 <Button
                   variant="outline"
                   className="w-full"
-                  onClick={handleSignOut}
+                  onClick={() => {}}
                 >
                   <LogOut className="w-4 h-4 mr-2" />
                   Sign Out
