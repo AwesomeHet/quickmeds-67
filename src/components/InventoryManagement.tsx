@@ -21,10 +21,24 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Plus } from "lucide-react";
 
+// Define the type for inventory items
+type InventoryItem = {
+  id: string;
+  name: string;
+  description: string | null;
+  quantity: number;
+  unit_price: number;
+  category: string | null;
+  sku: string | null;
+};
+
+// Define the type for new item form
+type NewInventoryItem = Omit<InventoryItem, "id">;
+
 const InventoryManagement = () => {
   const queryClient = useQueryClient();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [newItem, setNewItem] = useState({
+  const [newItem, setNewItem] = useState<NewInventoryItem>({
     name: "",
     description: "",
     quantity: 0,
@@ -46,7 +60,7 @@ const InventoryManagement = () => {
   });
 
   const addItemMutation = useMutation({
-    mutationFn: async (newItem: typeof newItem) => {
+    mutationFn: async (newItem: NewInventoryItem) => {
       const { data, error } = await supabase
         .from("inventory_items")
         .insert([newItem])
