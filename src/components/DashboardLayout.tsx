@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   LayoutDashboard,
@@ -9,15 +9,17 @@ import {
   LogOut,
   DollarSign,
 } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { profile, signOut } = useAuth();
 
-  // Temporary mock profile for development
-  const mockProfile = {
-    full_name: "Development User",
-    role: "superadmin",
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/auth");
   };
 
   const menuItems = [
@@ -34,7 +36,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   ];
 
   const filteredMenuItems = menuItems.filter(
-    (item) => !item.roles || (mockProfile?.role && item.roles.includes(mockProfile.role))
+    (item) => !item.roles || (profile?.role && item.roles.includes(profile.role))
   );
 
   return (
@@ -48,12 +50,13 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
           <nav className="flex-1 p-4">
             {filteredMenuItems.map((item) => {
               const Icon = item.icon;
+              const isActive = location.pathname === item.path;
               return (
                 <Link
                   key={item.path}
                   to={item.path}
                   className={`flex items-center space-x-2 p-2 rounded-lg mb-2 ${
-                    location.pathname === item.path
+                    isActive
                       ? "bg-primary text-white"
                       : "hover:bg-gray-100"
                   }`}
@@ -67,13 +70,13 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
           <div className="p-4 border-t">
             <div className="mb-4">
               <p className="text-sm text-gray-600">Signed in as:</p>
-              <p className="font-medium">{mockProfile?.full_name}</p>
-              <p className="text-sm text-gray-600 capitalize">{mockProfile?.role}</p>
+              <p className="font-medium">{profile?.full_name}</p>
+              <p className="text-sm text-gray-600 capitalize">{profile?.role}</p>
             </div>
             <Button
               variant="outline"
               className="w-full"
-              onClick={() => {}}
+              onClick={handleSignOut}
             >
               <LogOut className="w-4 h-4 mr-2" />
               Sign Out
@@ -121,13 +124,14 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
             <nav className="p-4">
               {filteredMenuItems.map((item) => {
                 const Icon = item.icon;
+                const isActive = location.pathname === item.path;
                 return (
                   <Link
                     key={item.path}
                     to={item.path}
                     onClick={() => setIsMobileMenuOpen(false)}
                     className={`flex items-center space-x-2 p-2 rounded-lg mb-2 ${
-                      location.pathname === item.path
+                      isActive
                         ? "bg-primary text-white"
                         : "hover:bg-gray-100"
                     }`}
@@ -140,15 +144,15 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
               <div className="mt-4 pt-4 border-t">
                 <div className="mb-4">
                   <p className="text-sm text-gray-600">Signed in as:</p>
-                  <p className="font-medium">{mockProfile?.full_name}</p>
+                  <p className="font-medium">{profile?.full_name}</p>
                   <p className="text-sm text-gray-600 capitalize">
-                    {mockProfile?.role}
+                    {profile?.role}
                   </p>
                 </div>
                 <Button
                   variant="outline"
                   className="w-full"
-                  onClick={() => {}}
+                  onClick={handleSignOut}
                 >
                   <LogOut className="w-4 h-4 mr-2" />
                   Sign Out
