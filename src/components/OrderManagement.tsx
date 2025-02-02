@@ -9,8 +9,11 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
 
 const OrderManagement = () => {
+  const { toast } = useToast();
   const { data: orders, isLoading } = useQuery({
     queryKey: ["orders"],
     queryFn: async () => {
@@ -32,6 +35,26 @@ const OrderManagement = () => {
     },
   });
 
+  const approveOrder = async (orderId: string) => {
+    const { error } = await supabase
+      .from("orders")
+      .update({ admin_approved: true, status: "completed" })
+      .eq("id", orderId);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to approve order",
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Success",
+        description: "Order approved successfully",
+      });
+    }
+  };
+
   if (isLoading) return <div>Loading...</div>;
 
   return (
@@ -45,8 +68,11 @@ const OrderManagement = () => {
             <TableHead>Status</TableHead>
             <TableHead>Items</TableHead>
             <TableHead>Total Amount</TableHead>
+            <TableHead>Profit Margin</TableHead>
+            <TableHead>Payment</TableHead>
             <TableHead>Created By</TableHead>
             <TableHead>Date</TableHead>
+            <TableHead>Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -74,9 +100,36 @@ const OrderManagement = () => {
                   .join(", ")}
               </TableCell>
               <TableCell>${order.total_amount.toFixed(2)}</TableCell>
+              <TableCell>{order.profit_margin}%</TableCell>
+              <TableCell>
+                <div className="flex flex-col">
+                  <Badge variant="outline" className="mb-1">
+                    {order.payment_method}
+                  </Badge>
+                  <Badge
+                    variant={
+                      order.payment_status === "completed"
+                        ? "default"
+                        : "secondary"
+                    }
+                  >
+                    {order.payment_status}
+                  </Badge>
+                </div>
+              </TableCell>
               <TableCell>{order.profiles?.full_name}</TableCell>
               <TableCell>
                 {new Date(order.created_at).toLocaleDateString()}
+              </TableCell>
+              <TableCell>
+                {order.status === "pending" && !order.admin_approved && (
+                  <Button
+                    size="sm"
+                    onClick={() => approveOrder(order.id)}
+                  >
+                    Approve
+                  </Button>
+                )}
               </TableCell>
             </TableRow>
           ))}

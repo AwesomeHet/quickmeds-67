@@ -106,25 +106,37 @@ export type Database = {
       }
       orders: {
         Row: {
+          admin_approved: boolean | null
           created_at: string | null
           created_by: string | null
           id: string
+          payment_method: string | null
+          payment_status: string | null
+          profit_margin: number | null
           status: string
           total_amount: number
           updated_at: string | null
         }
         Insert: {
+          admin_approved?: boolean | null
           created_at?: string | null
           created_by?: string | null
           id?: string
+          payment_method?: string | null
+          payment_status?: string | null
+          profit_margin?: number | null
           status?: string
           total_amount: number
           updated_at?: string | null
         }
         Update: {
+          admin_approved?: boolean | null
           created_at?: string | null
           created_by?: string | null
           id?: string
+          payment_method?: string | null
+          payment_status?: string | null
+          profit_margin?: number | null
           status?: string
           total_amount?: number
           updated_at?: string | null

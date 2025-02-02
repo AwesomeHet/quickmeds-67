@@ -7,6 +7,7 @@ import {
   ShoppingCart,
   Users,
   LogOut,
+  DollarSign,
 } from "lucide-react";
 
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
@@ -23,6 +24,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
     { path: "/dashboard", label: "Overview", icon: LayoutDashboard },
     { path: "/dashboard/inventory", label: "Inventory", icon: Package },
     { path: "/dashboard/orders", label: "Orders", icon: ShoppingCart },
+    { path: "/dashboard/pos", label: "POS", icon: DollarSign },
     {
       path: "/dashboard/users",
       label: "Users",
