@@ -29,6 +29,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Plus, Printer, ShoppingCart } from "lucide-react";
+import { Navigate } from "react-router-dom";
 
 type CartItem = {
   id: string;
@@ -40,12 +41,17 @@ type CartItem = {
 
 const POSSystem = () => {
   const { toast } = useToast();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const queryClient = useQueryClient();
   const [cart, setCart] = useState<CartItem[]>([]);
   const [profitMargin, setProfitMargin] = useState(0);
   const [paymentMethod, setPaymentMethod] = useState<string>("cash");
   const [isCheckoutDialogOpen, setIsCheckoutDialogOpen] = useState(false);
+
+  // If not authenticated, redirect to login
+  if (!user) {
+    return <Navigate to="/auth" replace />;
+  }
 
   const { data: inventory, isLoading } = useQuery({
     queryKey: ["inventory"],
@@ -193,17 +199,6 @@ const POSSystem = () => {
   };
 
   if (isLoading) return <div>Loading...</div>;
-
-  if (!user) {
-    return (
-      <div className="p-4 text-center">
-        <h2 className="text-2xl font-bold mb-4">Authentication Required</h2>
-        <p>Please log in to access the POS system.</p>
-      </div>
-    );
-  }
-
-  // ... keep existing code (JSX for inventory and cart sections)
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
