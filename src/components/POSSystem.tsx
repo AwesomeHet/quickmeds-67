@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/AuthContext";
 import {
   Table,
   TableBody,
@@ -40,7 +39,6 @@ type CartItem = {
 
 const POSSystem = () => {
   const { toast } = useToast();
-  const { user } = useAuth();
   const queryClient = useQueryClient();
   const [cart, setCart] = useState<CartItem[]>([]);
   const [profitMargin, setProfitMargin] = useState(0);
@@ -61,8 +59,6 @@ const POSSystem = () => {
 
   const createOrderMutation = useMutation({
     mutationFn: async () => {
-      if (!user) throw new Error("User not authenticated");
-
       // Calculate total amount
       const totalAmount = cart.reduce((sum, item) => sum + item.total_price, 0);
       const orderWithMargin = totalAmount * (1 + profitMargin / 100);
@@ -77,7 +73,6 @@ const POSSystem = () => {
             payment_method: paymentMethod,
             status: profitMargin > 0 ? "pending" : "completed",
             admin_approved: profitMargin === 0,
-            created_by: user.id, // Add the user ID here
           },
         ])
         .select()
@@ -123,13 +118,6 @@ const POSSystem = () => {
         description: profitMargin > 0 
           ? "Order is pending admin approval"
           : "Order has been completed",
-      });
-    },
-    onError: (error) => {
-      toast({
-        title: "Error creating order",
-        description: error.message,
-        variant: "destructive",
       });
     },
   });
@@ -181,29 +169,10 @@ const POSSystem = () => {
   };
 
   const handleCheckout = () => {
-    if (!user) {
-      toast({
-        title: "Error",
-        description: "You must be logged in to create orders",
-        variant: "destructive",
-      });
-      return;
-    }
     createOrderMutation.mutate();
   };
 
   if (isLoading) return <div>Loading...</div>;
-
-  if (!user) {
-    return (
-      <div className="p-4 text-center">
-        <h2 className="text-2xl font-bold mb-4">Authentication Required</h2>
-        <p>Please log in to access the POS system.</p>
-      </div>
-    );
-  }
-
-  // ... keep existing code (JSX for inventory and cart sections)
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
