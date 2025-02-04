@@ -1,23 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Session, User } from "@supabase/supabase-js";
 
-type Profile = {
-  id: string;
-  email: string;
-  full_name: string | null;
-  role: "superadmin" | "admin" | "employee";
-};
-
-type AuthContextType = {
-  session: Session | null;
-  user: User | null;
-  profile: Profile | null;
-  loading: boolean;
-  signOut: () => Promise<void>;
-};
-
-const AuthContext = createContext<AuthContextType>({
+const AuthContext = createContext({
   session: null,
   user: null,
   profile: null,
@@ -25,10 +9,10 @@ const AuthContext = createContext<AuthContextType>({
   signOut: async () => {},
 });
 
-export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [session, setSession] = useState<Session | null>(null);
-  const [user, setUser] = useState<User | null>(null);
-  const [profile, setProfile] = useState<Profile | null>(null);
+export const AuthProvider = ({ children }) => {
+  const [session, setSession] = useState(null);
+  const [user, setUser] = useState(null);
+  const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -56,7 +40,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const fetchProfile = async (userId: string) => {
+  const fetchProfile = async (userId) => {
     const { data, error } = await supabase
       .from("profiles")
       .select("*")
