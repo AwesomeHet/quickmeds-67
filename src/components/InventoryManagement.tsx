@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { getCollection } from "@/integrations/mongodb/client";
 import {
   Table,
   TableBody,
@@ -23,7 +23,7 @@ import { Plus } from "lucide-react";
 
 // Define the type for inventory items
 type InventoryItem = {
-  id: string;
+  _id: string;
   name: string;
   description: string | null;
   quantity: number;
@@ -33,7 +33,7 @@ type InventoryItem = {
 };
 
 // Define the type for new item form
-type NewInventoryItem = Omit<InventoryItem, "id">;
+type NewInventoryItem = Omit<InventoryItem, "_id">;
 
 const InventoryManagement = () => {
   const queryClient = useQueryClient();
@@ -50,24 +50,16 @@ const InventoryManagement = () => {
   const { data: inventory, isLoading } = useQuery({
     queryKey: ["inventory"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("inventory_items")
-        .select("*")
-        .order("name");
-      if (error) throw error;
-      return data;
+      const collection = await getCollection("inventory_items");
+      return collection.find().sort({ name: 1 }).toArray();
     },
   });
 
   const addItemMutation = useMutation({
     mutationFn: async (newItem: NewInventoryItem) => {
-      const { data, error } = await supabase
-        .from("inventory_items")
-        .insert([newItem])
-        .select()
-        .single();
-      if (error) throw error;
-      return data;
+      const collection = await getCollection("inventory_items");
+      const result = await collection.insertOne(newItem);
+      return { ...newItem, _id: result.insertedId };
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["inventory"] });
@@ -203,7 +195,7 @@ const InventoryManagement = () => {
         </TableHeader>
         <TableBody>
           {inventory?.map((item) => (
-            <TableRow key={item.id}>
+            <TableRow key={item._id}>
               <TableCell>{item.name}</TableCell>
               <TableCell>{item.description}</TableCell>
               <TableCell>{item.quantity}</TableCell>
